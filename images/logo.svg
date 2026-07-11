@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 40" fill="none">
+  <!-- 打开的书本 -->
+  <g transform="translate(4, 4)">
+    <path d="M0 6C0 2 4 0 8 0L14 0L14 24L8 24C4 24 0 22 0 18Z" fill="#C67B5C" opacity="0.85"/>
+    <path d="M14 0L20 0C24 0 28 2 28 6V18C28 22 24 24 20 24L14 24Z" fill="#C67B5C" opacity="0.6"/>
+    <line x1="14" y1="2" x2="14" y2="22" stroke="#FAF6F0" stroke-width="0.8" opacity="0.6"/>
+    <!-- 书签 -->
+    <path d="M11 0L11 10L13 9L15 10L15 0" fill="#B8A5C9" opacity="0.7"/>
+  </g>
+  <!-- 文字 -->
+  <text x="36" y="18" font-family="Georgia, 'Noto Serif SC', serif" font-size="15" font-weight="700" fill="#3D322B">Her Lib</text>
+  <text x="36" y="33" font-family="'PingFang SC', 'Noto Sans SC', sans-serif" font-size="9" fill="#8C8076" letter-spacing="1.5">她的书库</text>
+</svg>

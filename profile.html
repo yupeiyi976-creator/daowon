@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="light">
+<head><base href="/HerLib/">
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>个人中心 | Her Lib 她的书库</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<nav class="nav scrolled"><div class="nav-inner">
+<a href="index.html" class="nav-logo"><span style="font-family:Georgia,'Noto Serif SC',serif;font-size:1.3rem;font-weight:700;color:var(--color-accent)">📖 Her Lib</span><span style="font-size:0.7rem;color:var(--color-text-muted);margin-left:6px">她的书库</span></a>
+<div class="nav-links"><a href="index.html">首页</a><a href="category.html">分类</a><a href="submit.html">投稿</a><a href="disclaimer.html">关于</a></div>
+<div class="nav-tools"><span id="navUserArea"><a href="login.html" class="nav-login-btn">登录</a></span></div></div></nav>
+
+<main class="page-content"><div class="container">
+<h2 style="margin-bottom:var(--space-lg)">👤 个人中心</h2>
+<p style="color:var(--color-text-muted);font-size:0.75rem;margin-bottom:var(--space-lg)">🔒 你的收藏、阅读记录仅本人可见</p>
+
+<div class="profile-tabs">
+  <button class="profile-tab active" data-tab="collections">🔖 我的收藏</button>
+  <button class="profile-tab" data-tab="stars">⭐ 我的置顶</button>
+  <button class="profile-tab" data-tab="reading">📖 阅读清单</button>
+  <button class="profile-tab" data-tab="comments">💬 我的评论</button>
+  <button class="profile-tab" data-tab="quotes">💬 语录收藏</button>
+</div>
+
+<div class="profile-section active" id="tab-collections"><div class="card-grid" id="collectionsGrid"></div></div>
+<div class="profile-section" id="tab-stars"><div class="card-grid" id="starsGrid"></div></div>
+<div class="profile-section" id="tab-reading"><div class="card-grid" id="readingGrid"></div></div>
+<div class="profile-section" id="tab-comments"><div id="myCommentsList"></div></div>
+<div class="profile-section" id="tab-quotes"><div id="quotesList"></div></div>
+
+<div style="margin-top:var(--space-2xl);padding-top:var(--space-xl);border-top:1px solid var(--color-border-light)">
+<h4>⚙️ 设置</h4>
+<button class="btn btn-sm btn-ghost" id="clearLocalData" style="margin-top:var(--space-md);color:var(--color-error)">🗑️ 一键清除本地缓存</button>
+</div></div></main>
+
+<script src="js/data.js"></script>
+<script src="js/supabase.js"></script>
+<script>
+(function() {
+  // tabs切换
+  document.querySelectorAll('.profile-tab').forEach(function(tab) {
+    tab.addEventListener('click', function() {
+      document.querySelectorAll('.profile-tab').forEach(function(t) { t.classList.remove('active'); });
+      this.classList.add('active');
+      document.querySelectorAll('.profile-section').forEach(function(s) { s.classList.remove('active'); });
+      document.getElementById('tab-' + this.dataset.tab).classList.add('active');
+    });
+  });
+
+  // 清除缓存
+  document.getElementById('clearLocalData').addEventListener('click', function() {
+    if (confirm('确定清除所有本地数据？')) { localStorage.clear(); location.reload(); }
+  });
+
+  // 等待数据加载后渲染
+  function waitAndRender(retries) {
+    if (window.books && window.getCurrentUser) { renderAll(); }
+    else if ((retries || 0) < 50) { setTimeout(function() { waitAndRender((retries||0)+1); }, 100); }
+  }
+
+  waitAndRender();
+
+  async function renderAll() {
+    // 直接从 localStorage 检查（和主页 checkSavedSession 完全一致）
+    var saved = localStorage.getItem('herlib-firebase-user');
+    var user = null;
+    if (saved) { try { user = JSON.parse(saved); } catch(e) {} }
+    if (!user) {
+      var demo = localStorage.getItem('herlib-demo-user');
+      if (demo) user = { id: 'demo-' + demo, email: demo };
+    }
+    if (!user) { document.querySelector('.container').innerHTML = '<div class="empty-state"><div class="empty-state-icon">🔐</div><div class="empty-state-title">请先登录</div><div class="empty-state-desc">登录后查看你的收藏和阅读记录</div><a href="login.html" class="btn btn-primary">去登录</a></div>'; return; }
+
+    var collections = await window.getUserCollections(user.id);
+    if (!collections.length) { showEmpty('collectionsGrid', '还没有收藏书籍，去分类页看看吧～'); showEmpty('starsGrid', ''); showEmpty('readingGrid', ''); showEmptyQuotes(); return; }
+
+    // 收藏
+    var collected = collections.map(function(c) { var b = window.books.find(function(x) { return x.id === c.book_id; }); return b ? Object.assign({}, b, { colData: c }) : null; }).filter(Boolean);
+    renderBooks('collectionsGrid', collected);
+
+    // 置顶
+    var starred = collected.filter(function(b) { return b.colData && b.colData.is_top; });
+    if (starred.length) renderBooks('starsGrid', starred); else showEmpty('starsGrid', '暂无置顶书籍');
+
+    // 批量管理
+    var batchMode = false;
+    var batchBar = document.createElement('div');
+    batchBar.className = 'batch-toolbar';
+    batchBar.innerHTML = '<span style=font-size:0.85rem>已选 <strong id=batchCount>0</strong> 本</span><button class=\"btn btn-sm btn-outline\" id=batchSelectAll>全选</button><button class=\"btn btn-sm\" style=\"background:var(--color-error);color:#fff\" id=batchDelete>🗑 批量删除</button><button class=\"btn btn-sm btn-ghost\" id=batchCancel>取消</button>';
+    document.querySelector('.container').insertBefore(batchBar, document.getElementById('tab-collections'));
+
+    document.getElementById('batchSelectAll').addEventListener('click', function() {
+      document.querySelectorAll('.batch-checkbox').forEach(function(cb) { cb.checked = true; });
+      updateBatchCount();
+    });
+    document.getElementById('batchCancel').addEventListener('click', function() { toggleBatch(false); });
+    document.getElementById('batchDelete').addEventListener('click', async function() {
+      var checked = document.querySelectorAll('.batch-checkbox:checked');
+      if (!checked.length) { alert('请先勾选要删除的书籍'); return; }
+      if (!confirm('确定删除选中的 ' + checked.length + ' 本书的收藏？')) return;
+      for (var i = 0; i < checked.length; i++) {
+        await window.removeCollection(user.id, checked[i].dataset.bookId);
+      }
+      alert('✅ 已删除'); location.reload();
+    });
+
+    window.toggleBatch = function(on) {
+
+      batchMode = on;
+      document.querySelectorAll('.batch-checkbox').forEach(function(cb) { cb.style.display = on ? 'block' : 'none'; });
+      batchBar.classList.toggle('active', on);
+      if (!on) { document.querySelectorAll('.batch-checkbox').forEach(function(cb) { cb.checked = false; }); updateBatchCount(); }
+    }
+    window.updateBatchCount = function() {
+
+      var n = document.querySelectorAll('.batch-checkbox:checked').length;
+      document.getElementById('batchCount').textContent = n;
+    }
+
+    // 在每个tab区添加批量管理按钮
+    var batchBtn = document.createElement('button');
+    batchBtn.className = 'btn btn-sm btn-outline';
+    batchBtn.textContent = '☑ 批量管理';
+    batchBtn.style.cssText = 'margin-bottom:12px';
+    batchBtn.addEventListener('click', function() { toggleBatch(!batchMode); });
+    document.getElementById('tab-collections').insertBefore(batchBtn, document.getElementById('tab-collections').firstChild);
+
+    // 阅读清单（在读+已读完）
+    var reading = collected.filter(function(b) { return b.colData && (b.colData.read_status === 'reading' || b.colData.read_status === 'finished'); });
+    if (reading.length) renderBooks('readingGrid', reading); else showEmpty('readingGrid', '暂无阅读记录');
+
+    // 语录
+    var quotes = [];
+    collections.forEach(function(c) { if (c.saved_quotes && c.saved_quotes.length) { quotes = quotes.concat(c.saved_quotes); } });
+    if (quotes.length) renderQuotes(quotes); else showEmptyQuotes();
+
+    // 我的评论
+    var userEmail = localStorage.getItem('herlib-demo-user') || '';
+    if (userEmail && window.getAllUserComments) {
+      window.getAllUserComments(userEmail).then(function(comments) {
+        var el = document.getElementById('myCommentsList');
+        if (!el) return;
+        if (!comments.length) { el.innerHTML = '<p style="color:var(--color-text-muted);text-align:center;padding:var(--space-xl)">还没有发表评论</p>'; return; }
+        el.innerHTML = comments.map(function(c) {
+          var book = window.books.find(function(b) { return b.id === c.book_id; });
+          return '<div style="padding:12px;margin-bottom:8px;background:var(--color-bg-card);border-radius:8px;border-left:3px solid var(--color-accent)">' +
+            '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">' +
+            '<a href="book.html?id='+c.book_id+'" style="font-weight:600;color:var(--color-text);font-size:0.85rem">' + (book ? '《'+book.title+'》' : c.book_id) + '</a>' +
+            '<button class="del-my-comment" data-book="'+c.book_id+'" data-id="'+c.id+'" style="background:none;border:none;color:var(--color-error);cursor:pointer;font-size:0.7rem">🗑 删除</button>' +
+            '</div>' +
+            '<div style="color:var(--color-text-secondary);font-size:0.8rem">' + '⭐'.repeat(c.rating||5) + ' ' + c.content + '</div>' +
+            '<div style="font-size:0.65rem;color:var(--color-text-muted);margin-top:2px">' + (c.created_at||'').substring(0,10) + '</div></div>';
+        }).join('');
+        // 绑定删除
+        el.querySelectorAll('.del-my-comment').forEach(function(btn) {
+          btn.addEventListener('click', async function() {
+            if (!confirm('确定删除？')) return;
+            await window.deleteComment(this.dataset.book, this.dataset.id);
+            location.reload();
+          });
+        });
+      });
+    }
+  }
+
+  function renderBooks(gridId, books) {
+    var grid = document.getElementById(gridId);
+    if (!grid) return;
+    grid.innerHTML = '';
+    books.forEach(function(b) {
+      var card = document.createElement('a');
+      card.href = 'book.html?id=' + b.id;
+      card.className = 'book-card';
+      var status = b.colData ? b.colData.read_status : '';
+      card.innerHTML = '<input type=checkbox class=batch-checkbox data-book-id='+b.id+' style=display:none;position:absolute;top:8px;left:8px;z-index:5;width:18px;height:18px onchange=updateBatchCount()>' +
+        '<div style="aspect-ratio:3/4;background:linear-gradient(135deg,#D4A78A,#C67B5C,#E8C8B0);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:12px;text-align:center;color:#fff">' +
+        '<div style="font-size:0.85rem;font-weight:700;text-shadow:0 1px 4px rgba(0,0,0,0.15)">' + b.title + '</div>' +
+        '<div style="font-size:0.6rem;opacity:0.8;margin-top:4px">' + b.author + '</div>' +
+        (status === 'reading' ? '<div style="margin-top:8px;font-size:0.65rem;background:rgba(255,255,255,0.2);padding:2px 8px;border-radius:10px">🟢 在读</div>' : '') +
+        (status === 'finished' ? '<div style="margin-top:8px;font-size:0.65rem;background:rgba(255,255,255,0.2);padding:2px 8px;border-radius:10px">🔵 已读完</div>' : '') +
+        '</div>';
+      grid.appendChild(card);
+    });
+  }
+
+  function renderQuotes(quotes) {
+    var el = document.getElementById('quotesList');
+    if (!el) return;
+    el.innerHTML = quotes.map(function(q) {
+      return '<div style="padding:12px;margin-bottom:8px;background:var(--color-bg-card);border-radius:8px;border-left:3px solid var(--color-accent)">' +
+        '<p style="font-style:italic;margin:0">' + (q.quoteText || '') + '</p>' +
+        '<p style="font-size:0.7rem;color:var(--color-text-muted);margin-top:4px">—— 《' + (q.bookTitle || '') + '》</p></div>';
+    }).join('');
+  }
+
+  function showEmpty(gridId, msg) {
+    var grid = document.getElementById(gridId);
+    if (grid && msg) grid.innerHTML = '<p style="color:var(--color-text-muted);text-align:center;padding:var(--space-xl)">' + msg + '</p>';
+  }
+
+  function showEmptyQuotes() {
+    var el = document.getElementById('quotesList');
+    if (el) el.innerHTML = '<p style="color:var(--color-text-muted);text-align:center;padding:var(--space-xl)">还没有收藏语录，去书籍详情页发现金句吧～</p>';
+  }
+})();
+</script>
+<!-- 悬浮书页向导 -->
+<div class="floating-guide" id="floatingGuide">
+<div class="guide-panel" id="guidePanel">
+<div class="guide-panel-header">📖 书页向导</div>
+<div class="guide-panel-body">
+<div class="guide-section"><h4>❓ 常见问题</h4>
+<p><strong>收藏怎么用？</strong><br>点击书籍卡片右上角⭐即可收藏，在此页面统一管理。</p>
+<p><strong>这个网站是谁做的？</strong><br>本站为 daowon 独立搭建的公益书单网站，全部内容、页面设计均为本人原创。</p>
+</div>
+<div class="guide-section"><h4>🌱 阅读路径</h4>
+<p><a href="category.html?level=beginner">→ 入门书单（新手友好）</a></p>
+<p><a href="category.html?level=advanced">→ 进阶书单（理论深入）</a></p>
+</div>
+<div class="guide-section"><h4>📬 反馈</h4>
+<p>邮箱：2935357829@qq.com</p>
+</div></div></div>
+<button class="guide-toggle" id="guideToggle" aria-label="打开书页向导" onclick="var p=document.getElementById('guidePanel');p.classList.toggle('active');event.stopPropagation()" ontouchstart="var p=document.getElementById('guidePanel');p.classList.toggle('active');event.stopPropagation();event.preventDefault()">📖</button></div>
+</body>
+</html>

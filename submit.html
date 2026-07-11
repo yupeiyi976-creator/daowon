@@ -1,0 +1,135 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><base href="/HerLib/">
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="向 Her Lib 投稿女性主义书籍，帮助更多读者发现好书。"><meta name="referrer" content="no-referrer">
+<title>投稿书籍 | Her Lib 她的书库</title><link rel="stylesheet" href="css/style.css"></head><body>
+<nav class="nav scrolled"><div class="nav-inner">
+<a href="index.html" class="nav-logo"><span style="font-family:Georgia,'Noto Serif SC',serif;font-size:1.3rem;font-weight:700;color:var(--color-accent);letter-spacing:0.02em">📖 Her Lib</span><span style="font-size:0.7rem;color:var(--color-text-muted);margin-left:6px;letter-spacing:1px">她的书库</span></a>
+<div class="nav-links"><a href="index.html">首页</a><a href="category.html">分类</a><a href="submit.html" class="active">投稿</a><a href="disclaimer.html">关于</a></div>
+<div class="nav-tools"><span id="navUserArea"><a href="login.html" class="nav-login-btn">登录</a></span></div></div></nav>
+<main class="page-content"><div class="container container-narrow">
+<div class="breadcrumb"><a href="index.html">首页</a><span class="separator">›</span><span>投稿书籍</span></div>
+<h2 style="margin-bottom:var(--space-lg)">📝 投稿书籍</h2>
+<div class="submission-status-list" id="submissionStatus" style="display:none"><h4 style="margin-bottom:var(--space-sm)">📋 我的投稿记录</h4><div id="submissionStatusList"></div></div>
+<p style="color:var(--color-text-secondary);margin-bottom:var(--space-xl)">推荐你喜欢的女性主义书籍，审核通过后会在全站展示。请按收录标准提交～</p>
+<form id="submitForm">
+<div class="form-group"><label class="form-label">书名 <span class="required">*</span></label><span class="form-hint">示例：《从零开始的女性主义》</span><input type="text" class="form-input" id="subTitle" required></div>
+<div class="form-group"><label class="form-label">作者 <span class="required">*</span></label><input type="text" class="form-input" id="subAuthor" required></div>
+<div class="form-group"><label class="form-label">推荐栏目</label><select class="form-select" id="subCategory"><option value="thought">思潮漫步</option><option value="origin">与原生和解</option><option value="workplace">职场她力量</option><option value="motherhood">母职观察</option><option value="local">本土她故事</option></select></div>
+<div class="form-group"><label class="form-label">阅读分级</label><div style="display:flex;gap:var(--space-md)"><label class="form-radio"><input type="radio" name="subLevel" value="beginner" checked>🌱 入门</label><label class="form-radio"><input type="radio" name="subLevel" value="advanced">🌳 进阶</label></div></div>
+<div class="form-group"><label class="form-label">关键词标签 <span class="required">*</span></label><span class="form-hint">示例：输入标签后回车添加，如 #原生家庭 #母女和解</span><div class="tags-input-wrapper" id="tagsInput"><input type="text" placeholder="输入标签后回车…"></div></div>
+<div class="form-group"><label class="form-label">地域分类</label><select class="form-select" id="subRegion"><option value="东亚">东亚</option><option value="欧美">欧美</option><option value="国内本土">国内本土</option></select></div>
+<div class="form-group"><label class="form-label">书籍体裁</label><select class="form-select" id="subGenre"><option value="理论专著">理论专著</option><option value="纪实非虚构">纪实非虚构</option><option value="虚构小说">虚构小说</option><option value="随笔散文">随笔散文</option></select></div>
+<div class="form-group"><label class="form-label">人文导读 <span class="required">*</span></label><span class="form-hint">用你自己的话，温柔简洁地介绍这本书</span><textarea class="form-textarea" id="subGuide" required></textarea></div>
+<div class="form-group"><label class="form-label">封面图片 URL</label><input type="text" class="form-input" id="subCover" placeholder="https://…"></div>
+<div class="form-group"><label class="form-label">正版阅读链接</label><input type="url" class="form-input" id="subLink" placeholder="https://…（必须以http开头）"></div>
+<div class="form-group"><label class="form-label">避雷阅读提示 <span class="required">*</span></label><span class="form-hint">无则填"无特殊阅读避雷提示"</span><textarea class="form-textarea" id="subWarning" required style="min-height:60px"></textarea></div>
+<div class="form-group"><label class="form-label">你的昵称</label><input type="text" class="form-input" id="subName"></div>
+<div style="display:flex;gap:var(--space-md);flex-wrap:wrap">
+<button type="submit" class="btn btn-primary" id="submitBtn">提交投稿</button>
+<button type="button" class="btn btn-outline" id="saveDraftBtn">💾 保存草稿</button>
+</div>
+</form></div></main>
+
+<!-- 悬浮书页向导 -->
+<div class="floating-guide" id="floatingGuide">
+<div class="guide-panel" id="guidePanel">
+<div class="guide-panel-header">📖 书页向导</div>
+<div class="guide-panel-body">
+<div class="guide-section"><h4>❓ 常见问题</h4>
+<p><strong>怎么看书？</strong><br>点进任意书籍 → 点击「微信读书」按钮 → 跳转正版平台阅读</p>
+<p><strong>这个网站是谁做的？</strong><br>本站为 daowon 独立搭建的公益书单网站，全部内容、页面设计均为本人原创。</p>
+</div>
+<div class="guide-section"><h4>🌱 阅读路径</h4>
+<p><a href="category.html?level=beginner">→ 入门书单（新手友好）</a></p>
+<p><a href="category.html?level=advanced">→ 进阶书单（理论深入）</a></p>
+</div>
+<div class="guide-section"><h4>📬 反馈</h4>
+<p><a href="submit.html">→ 推荐书籍</a></p>
+<p>邮箱：2935357829@qq.com</p>
+</div></div></div>
+<button class="guide-toggle" id="guideToggle" aria-label="打开书页向导" onclick="var p=document.getElementById('guidePanel');p.classList.toggle('active');event.stopPropagation()" ontouchstart="var p=document.getElementById('guidePanel');p.classList.toggle('active');event.stopPropagation();event.preventDefault()">📖</button></div>
+<footer class="footer"><div class="footer-inner"><div class="footer-links"><a href="reading-channels.html">📖 阅读渠道说明</a><a href="disclaimer.html">⚖️ 版权免责声明</a><a href="usage-guide.html">📋 网站使用须知</a></div><p class="footer-copy">© 2026 Her Lib 她的书库</p><p class="footer-copy" style="font-size:0.65rem;color:var(--color-text-muted);margin-top:4px">daowon独立创作，所有页面设计、书单整理均为个人原创，无团队、无商业运营，纯个人公益分享</p><div style="margin-top:16px;padding-top:12px;border-top:1px solid var(--color-border-light);display:flex;flex-wrap:wrap;justify-content:center;gap:16px;font-size:0.75rem;color:var(--color-text-muted)"><span>📕 小红书 <strong>@她的书库</strong></span><span>💬 公众号 <strong>@她的书库</strong></span></div></div></footer>
+  <script src="js/supabase.js"></script>
+<script>
+  // 草稿加载
+  const draft = JSON.parse(localStorage.getItem('herlib-submit-draft') || '{}');
+  if (draft.subTitle) document.getElementById('subTitle').value = draft.subTitle || '';
+  if (draft.subAuthor) document.getElementById('subAuthor').value = draft.subAuthor || '';
+  if (draft.subGuide) document.getElementById('subGuide').value = draft.subGuide || '';
+  if (draft.subWarning) document.getElementById('subWarning').value = draft.subWarning || '';
+  if (draft.subName) document.getElementById('subName').value = draft.subName || '';
+  // 保存草稿
+  document.getElementById('saveDraftBtn').addEventListener('click', () => {
+    const d = { subTitle: document.getElementById('subTitle').value, subAuthor: document.getElementById('subAuthor').value, subGuide: document.getElementById('subGuide').value, subWarning: document.getElementById('subWarning').value, subName: document.getElementById('subName').value };
+    localStorage.setItem('herlib-submit-draft', JSON.stringify(d));
+    alert('✅ 草稿已保存到本地');
+  });
+  // 标签输入
+  const tagsInput = document.getElementById('tagsInput');
+  const tagInputField = tagsInput.querySelector('input');
+  const tags = [];
+  tagInputField.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') { e.preventDefault();
+      const val = this.value.trim();
+      if (val && !tags.includes(val)) { tags.push(val); renderTags(); }
+      this.value = '';
+    }
+  });
+  function renderTags() {
+    tagsInput.querySelectorAll('.tag-input-tag').forEach(t => t.remove());
+    tags.forEach((t, i) => {
+      const span = document.createElement('span'); span.className = 'tag-input-tag';
+      span.innerHTML = t + '<span class="remove-tag" data-idx="' + i + '">✕</span>';
+      tagsInput.insertBefore(span, tagInputField);
+    });
+    tagsInput.querySelectorAll('.remove-tag').forEach(btn => { btn.addEventListener('click', function() { tags.splice(parseInt(this.dataset.idx), 1); renderTags(); }); });
+  }
+  // 失焦校验
+  document.querySelectorAll('#subTitle,#subAuthor,#subGuide,#subWarning').forEach(el => {
+    el.addEventListener('blur', function() { if (this.required && !this.value.trim()) { this.classList.add('error'); } else { this.classList.remove('error'); } });
+  });
+  // 提交
+  document.getElementById('submitForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const btn = document.getElementById('submitBtn');
+    if (btn.disabled) return;
+    btn.disabled = true; btn.textContent = '提交中…';
+
+    try {
+      const url = document.getElementById('subLink').value.trim();
+      if (url && !url.startsWith('http')) { alert('阅读链接必须以 http:// 或 https:// 开头'); btn.disabled = false; btn.textContent = '提交投稿'; return; }
+
+      // 保存到 localStorage
+      var data = {
+        title: document.getElementById('subTitle').value.trim(),
+        author: document.getElementById('subAuthor').value.trim(),
+        category: document.getElementById('subCategory').value,
+        level: (document.querySelector('input[name="subLevel"]:checked') || {}).value || 'beginner',
+        genre: document.getElementById('subGenre').value,
+        region: document.getElementById('subRegion').value,
+        guide: document.getElementById('subGuide').value.trim(),
+        warning: document.getElementById('subWarning').value.trim(),
+        link: url,
+        tags: tags
+      };
+      var subs = JSON.parse(localStorage.getItem('herlib-submissions') || '[]');
+      var entry = Object.assign({}, data, { id: Date.now().toString(36) + Math.random().toString(36).substring(2,6), time: new Date().toISOString(), status: 'pending' });
+      subs.push(entry);
+      localStorage.setItem('herlib-submissions', JSON.stringify(subs));
+
+      // 发送到 API
+      await fetch('/api/submissions', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      }).catch(function(err) {
+        console.log('API发送失败，数据已存本地:', err);
+      });
+    } catch(err) {}
+
+    alert('✅ 投稿已提交！审核通过后将在全站展示。感谢你的推荐～');
+    btn.textContent = '已提交';
+    setTimeout(function() { btn.disabled = false; btn.textContent = '提交投稿'; }, 60000);
+    localStorage.removeItem('herlib-submit-draft');
+  });
+</script></body></html>

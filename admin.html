@@ -1,0 +1,202 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><base href="/HerLib/">
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>管理后台 | Her Lib 她的书库</title><link rel="stylesheet" href="css/style.css">
+<style>
+.tab-row { display:flex; gap:8px; margin-bottom:20px; flex-wrap:wrap; }
+.tab-btn { padding:8px 20px; border:1px solid var(--color-border); border-radius:var(--radius-md); background:var(--color-bg-card); cursor:pointer; }
+.tab-btn.on { background:var(--color-accent); color:#fff; border-color:var(--color-accent); }
+.panel { display:none; }
+.panel.show { display:block; }
+.tbl-wrap { overflow-x:auto; }
+.tbl { width:100%; border-collapse:collapse; font-size:0.82rem; }
+.tbl th,.tbl td { padding:8px 10px; border-bottom:1px solid var(--color-border); text-align:left; vertical-align:top; }
+.tbl th { background:var(--color-bg-card); font-weight:600; white-space:nowrap; }
+.badge { display:inline-block; padding:2px 8px; border-radius:10px; font-size:0.7rem; }
+.badge-yes { background:#d4edda; color:#155724; }
+.badge-no { background:#fff3cd; color:#856404; }
+.nodata { text-align:center; padding:32px; color:var(--color-text-muted); }
+</style></head><body>
+<nav class="nav scrolled"><div class="nav-inner">
+<a href="index.html" class="nav-logo"><span style="font-family:Georgia,serif;font-size:1.3rem;font-weight:700;color:var(--color-accent)">📖 Her Lib</span></a>
+<div class="nav-links"><a href="index.html">首页</a><span style="color:var(--color-accent);font-weight:600">⚙️ 管理</span></div></div></nav>
+
+<main class="page-content"><div class="container">
+<h2>⚙️ 管理后台</h2>
+
+<div class="tab-row">
+  <button class="tab-btn on" onclick="showTab('stats')">📊 书库统计</button>
+  <button class="tab-btn" onclick="showTab('subs')">📝 读者投稿</button>
+  <button class="tab-btn" onclick="showTab('fbs')">📬 读者反馈</button>
+</div>
+
+<!-- 统计 -->
+<div class="panel show" id="panel-stats">
+  <div class="admin-stats" id="adminStats">
+    <div class="stat-card"><div class="stat-number">--</div><div class="stat-label">全站总书籍</div></div>
+    <div class="stat-card"><div class="stat-number">--</div><div class="stat-label">入门 / 进阶</div></div>
+    <div class="stat-card"><div class="stat-number" id="pendBadge">--</div><div class="stat-label">待审核投稿</div></div>
+  </div>
+  <div style="margin-top:20px"><h4>五大栏目</h4><div id="catGrid" style="display:grid;grid-template-columns:repeat(5,1fr);gap:8px"></div></div>
+  <div style="margin-top:16px;display:flex;gap:8px">
+    <button class="btn btn-outline btn-sm" onclick="exportCSV()">📥 导出书籍 CSV</button>
+    <button class="btn btn-outline btn-sm" onclick="exportTemplate()">📋 空白模板</button>
+  </div>
+</div>
+
+<!-- 投稿 -->
+<div class="panel" id="panel-subs">
+  <div class="tbl-wrap"><table class="tbl" id="subsTbl"></table></div>
+  <div class="nodata" id="subsEmpty" style="display:none">暂无读者投稿</div>
+  <div style="margin-top:16px"><button class="btn btn-outline btn-sm" onclick="exportJSON('subs')">📥 导出 JSON</button></div>
+</div>
+
+<!-- 反馈 -->
+<div class="panel" id="panel-fbs">
+  <div class="tbl-wrap"><table class="tbl" id="fbsTbl"></table></div>
+  <div class="nodata" id="fbsEmpty" style="display:none">暂无读者反馈</div>
+  <div style="margin-top:16px"><button class="btn btn-outline btn-sm" onclick="exportJSON('fbs')">📥 导出 JSON</button></div>
+</div>
+</div></main>
+
+<footer class="footer"><div class="footer-inner">
+<p style="font-family:Georgia,serif;font-size:0.6rem;color:var(--color-text-muted);letter-spacing:3px">Her Library, Her Liberation</p>
+</div></footer>
+
+<script src="js/data.js"></script>
+<script>
+var API = '/api';
+
+function showTab(name) {
+  document.querySelectorAll('.tab-btn').forEach(function(b) { b.classList.remove('on'); });
+  document.querySelectorAll('.panel').forEach(function(p) { p.classList.remove('show'); });
+  event.target.classList.add('on');
+  document.getElementById('panel-' + name).classList.add('show');
+  if (name === 'subs') loadSubs();
+  if (name === 'fbs') loadFbs();
+}
+
+// === 统计 ===
+if (window.books) {
+  var t = window.books.length;
+  var beg = window.books.filter(function(b) { return b.level === 'beginner'; }).length;
+  var adv = window.books.filter(function(b) { return b.level === 'advanced'; }).length;
+  var ns = document.querySelectorAll('#adminStats .stat-number');
+  ns[0].textContent = t;
+  ns[1].textContent = '入门 ' + beg + ' / 进阶 ' + adv;
+  var cats = { thought:0, origin:0, workplace:0, motherhood:0, local:0 };
+  var labels = { thought:'思潮漫步', origin:'与原生和解', workplace:'职场她力量', motherhood:'母职观察', local:'本土她故事' };
+  window.books.forEach(function(b) { if (cats[b.category] !== undefined) cats[b.category]++; });
+  var h = '';
+  Object.keys(cats).forEach(function(k) {
+    h += '<div class="stat-card"><div class="stat-number" style="font-size:1.4rem">' + cats[k] + '</div><div class="stat-label">' + labels[k] + '</div></div>';
+  });
+  document.getElementById('catGrid').innerHTML = h;
+}
+
+loadSubs();
+
+// === 投稿 ===
+function loadSubs() {
+  var data = JSON.parse(localStorage.getItem('herlib-submissions') || '[]');
+  var tbody = document.getElementById('subsTbl');
+  var empty = document.getElementById('subsEmpty');
+  if (!data.length) { tbody.innerHTML = ''; empty.textContent = '暂无读者投稿'; empty.style.display = 'block'; updatePend(0); return; }
+  empty.style.display = 'none';
+  data = data.slice().reverse();
+  var h = '<tr><th>时间</th><th>书名</th><th>作者</th><th>栏目</th><th>难度</th><th>体裁</th><th>导读</th><th>标签</th><th>状态</th><th>操作</th></tr>';
+  data.forEach(function(s) {
+    h += '<tr>';
+    h += '<td style="white-space:nowrap;font-size:0.75rem">' + (s.time||'').substring(0,10) + '</td>';
+    h += '<td><strong>' + esc(s.title) + '</strong></td>';
+    h += '<td>' + esc(s.author) + '</td>';
+    h += '<td>' + esc(s.category) + '</td>';
+    h += '<td>' + esc(s.level) + '</td>';
+    h += '<td>' + esc(s.genre) + '</td>';
+    h += '<td style="max-width:240px;font-size:0.78rem">' + esc((s.guide||'').substring(0,80)) + '…</td>';
+    h += '<td style="font-size:0.72rem">' + esc((s.tags||[]).join(',')) + '</td>';
+    h += '<td><span class="badge ' + (s.status==='done'?'badge-yes':'badge-no') + '">' + (s.status==='done'?'已审':'待审') + '</span></td>';
+    h += '<td style="white-space:nowrap"><button class="btn btn-xs btn-outline" onclick="togSub(\'' + s.id + '\')">切换</button> <button class="btn btn-xs btn-outline" onclick="delSub(\'' + s.id + '\')" style="color:#c0392b">删</button></td>';
+    h += '</tr>';
+  });
+  tbody.innerHTML = h;
+  updatePend(data.filter(function(s) { return s.status !== 'done'; }).length);
+}
+
+window.togSub = function(id) {
+  var subs = JSON.parse(localStorage.getItem('herlib-submissions') || '[]');
+  var s = subs.find(function(x) { return x.id === id; });
+  if (s) { s.status = s.status === 'done' ? 'pending' : 'done'; localStorage.setItem('herlib-submissions', JSON.stringify(subs)); }
+  loadSubs();
+};
+
+window.delSub = function(id) {
+  if (!confirm('确定删除？')) return;
+  var subs = JSON.parse(localStorage.getItem('herlib-submissions') || '[]');
+  subs = subs.filter(function(x) { return x.id !== id; });
+  localStorage.setItem('herlib-submissions', JSON.stringify(subs));
+  loadSubs();
+}
+
+function updatePend(n) {
+  document.getElementById('pendBadge').textContent = n;
+}
+
+// === 反馈 ===
+async function loadFbs() {
+  var data = [];
+  try {
+    var r = await fetch(API + '/feedbacks');
+    if (r.ok) data = await r.json();
+  } catch(e) {}
+  if (!data.length) {
+    data = JSON.parse(localStorage.getItem('herlib-feedbacks') || '[]');
+  }
+  var tbody = document.getElementById('fbsTbl');
+  var empty = document.getElementById('fbsEmpty');
+  if (!data.length) { tbody.innerHTML = ''; empty.style.display = 'block'; return; }
+  empty.style.display = 'none';
+  data = data.slice().reverse();
+  var h = '<tr><th>时间</th><th>类型</th><th>内容</th></tr>';
+  data.forEach(function(f) {
+    h += '<tr><td style="white-space:nowrap;font-size:0.75rem">' + (f.time||'').substring(0,10) + '</td><td>' + esc(f.type) + '</td><td>' + esc(f.message) + '</td></tr>';
+  });
+  tbody.innerHTML = h;
+}
+
+// === 导出 ===
+function exportJSON(type) {
+  var key = type === 'subs' ? 'herlib-submissions' : 'herlib-feedbacks';
+  var endpoint = type === 'subs' ? '/submissions' : '/feedbacks';
+  fetch(API + endpoint).then(function(r) { return r.json(); }).then(function(data) {
+    download('herlib-' + type + '.json', JSON.stringify(data, null, 2));
+  }).catch(function() {
+    var data = JSON.parse(localStorage.getItem(key) || '[]');
+    download('herlib-' + type + '.json', JSON.stringify(data, null, 2));
+  });
+}
+
+function exportCSV() {
+  if (!window.books) return;
+  var hdr = '书名,作者,栏目,难度,地域,体裁,标签,出版年份\n';
+  var rows = window.books.map(function(b) {
+    return '"' + b.title + '","' + b.author + '","' + b.categoryLabel + '","' + b.levelLabel + '","' + b.region + '","' + b.genre + '","' + (b.tags||[]).join('/') + '","' + (b.publishYear||'') + '"';
+  }).join('\n');
+  download('herlib-books.csv', '﻿' + hdr + rows);
+}
+
+function exportTemplate() {
+  download('herlib-template.csv', '﻿书名,作者,栏目(thought/origin/workplace/motherhood/local),难度(beginner/advanced),地域,体裁,标签(用/分隔),出版年份\n');
+}
+
+function download(name, text) {
+  var a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([text], {type:'text/plain;charset=utf-8'}));
+  a.download = name; a.click();
+}
+
+function esc(s) {
+  if (!s) return '';
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+</script>
+</body></html>

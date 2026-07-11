@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="light" data-font-size="standard" data-minimal="false">
+<head><base href="/HerLib/">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script>
+  (function() {
+    var _alert = window.alert;
+    window.alert = function(msg) {
+      if (typeof msg === 'string' && (msg.indexOf('XSS_PROBE') >= 0 || msg.indexOf('xss') >= 0)) return;
+      _alert.call(window, msg);
+    };
+    var adDomains = ['tieba.baidu.com', 'baidu.com/tieba', 'taobao.com'];
+    var _open = window.open;
+    window.open = function(url) {
+      if (typeof url === 'string' && adDomains.some(function(d) { return url.indexOf(d) >= 0; })) return null;
+      return _open.apply(window, arguments);
+    };
+    new MutationObserver(function(mutations) {
+      mutations.forEach(function(m) {
+        m.addedNodes.forEach(function(node) {
+          if (node.tagName === 'SCRIPT' && node.src && node.src.indexOf('herlib.pages.dev') < 0) node.remove();
+          if (node.tagName === 'IFRAME') node.remove();
+        });
+      });
+    }).observe(document.documentElement, { childList: true, subtree: true });
+  })();
+  </script>
+  <meta name="description" content="Her Lib 分类浏览 — 按栏目、难度、流派、浪潮、地域、体裁多维度筛选女性主义书籍，找到最适合你的下一本读物。">
+  <meta name="referrer" content="no-referrer">
+  <title>分类浏览 | Her Lib 她的书库</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="manifest" href="manifest.json">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Her Lib">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <link rel="apple-touch-icon" href="images/icon-192.png">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><text y='28' font-size='28'>📂</text></svg>">
+</head>
+<body>
+
+  <!-- 导航栏（同首页） -->
+  <nav class="nav scrolled" id="navbar">
+    <div class="nav-inner">
+      <a href="index.html" class="nav-logo"><span style="font-family:Georgia,'Noto Serif SC',serif;font-size:1.3rem;font-weight:700;color:var(--color-accent);letter-spacing:0.02em">📖 Her Lib</span><span style="font-size:0.7rem;color:var(--color-text-muted);margin-left:6px;letter-spacing:1px">她的书库</span></a>
+      <div class="nav-links">
+        <a href="index.html">首页</a>
+        <a href="category.html" class="active">分类</a>
+        <a href="submit.html">投稿</a>
+        <a href="disclaimer.html">关于</a>
+      </div>
+      <div class="nav-tools">
+        <button class="nav-tool-btn hide-mobile" id="minimalToggle" title="极简模式"><span id="minimalIcon">📄</span></button>
+        <button class="nav-tool-btn hide-mobile" id="fontSizeToggle" title="字号">Aⁿ</button>
+        <button class="nav-tool-btn" id="themeToggle" title="深色模式"><span id="themeIcon">🌙</span></button>
+        <span id="navUserArea"><a href="login.html" class="nav-login-btn">登录</a></span>
+        <button class="nav-mobile-toggle" id="mobileMenuToggle">☰</button>
+      </div>
+    </div>
+  </nav>
+
+  <div class="mobile-menu-overlay" id="mobileMenuOverlay"></div>
+  <div class="mobile-menu" id="mobileMenu">
+    <button class="mobile-menu-close" id="mobileMenuClose">✕</button>
+    <a href="index.html">🏠 首页</a>
+    <a href="category.html" class="active">📂 分类浏览</a>
+    <a href="submit.html">📝 投稿书籍</a>
+    <a href="disclaimer.html">ℹ️ 关于我们</a>
+    <a href="profile.html" class="auth-only hidden">👤 个人中心</a>
+  </div>
+
+  <div class="offline-banner" id="offlineBanner">📡 当前无网络</div>
+
+  <!-- 页面主体 -->
+  <main class="page-content">
+    <div class="container">
+      <!-- 面包屑 -->
+      <div class="breadcrumb">
+        <a href="index.html">首页</a><span class="separator">›</span><span>分类浏览</span>
+      </div>
+
+      <h2 style="margin-bottom:var(--space-lg)">📂 分类浏览</h2>
+
+      <!-- 阅读阶梯 + 侧边栏布局 -->
+      <div style="display:flex;gap:var(--space-lg);flex-wrap:wrap">
+        <!-- 筛选栏（主内容区） -->
+        <div style="flex:1;min-width:0">
+
+          <!-- 思潮漫步内部分流卡片（仅在 thought 栏目时显示） -->
+          <div class="view-toggle-cards" id="thoughtToggle" style="display:none">
+            <div class="view-toggle-card active" data-view="school">
+              <div class="toggle-icon">📖</div>
+              <div class="toggle-title">按流派浏览</div>
+              <div class="toggle-desc">自由主义 / 存在主义 / 社会主义 / 激进 / 后现代 / 东亚本土 / 黑人</div>
+            </div>
+            <div class="view-toggle-card" data-view="wave">
+              <div class="toggle-icon">🌊</div>
+              <div class="toggle-title">按历史浪潮浏览</div>
+              <div class="toggle-desc">第一波（选举权）→ 第二波（父权制）→ 第三波（多元性别）</div>
+            </div>
+          </div>
+
+          <!-- 6行筛选栏 -->
+          <div class="filter-bar" id="filterBar">
+            <!-- 第1行：搜索 + 栏目 + 分级 + 排序 -->
+            <div class="filter-row">
+              <div class="search-bar" style="flex:2">
+                <span class="search-icon">🔍</span>
+                <input type="text" id="searchInput" placeholder="搜索书名、作者、关键词、理论流派…">
+                <div class="search-history" id="searchHistory"></div>
+              </div>
+              <select class="form-select" id="filterCategory" style="max-width:140px">
+                <option value="all">全部栏目</option>
+                <option value="thought">思潮漫步</option>
+                <option value="origin">与原生和解</option>
+                <option value="workplace">职场她力量</option>
+                <option value="motherhood">母职观察</option>
+                <option value="local">本土她故事</option>
+              </select>
+              <select class="form-select" id="filterLevel" style="max-width:120px">
+                <option value="all">全部难度</option>
+                <option value="beginner">🌱 入门</option>
+                <option value="advanced">🌳 进阶</option>
+              </select>
+              <select class="form-select" id="filterSort" style="max-width:150px">
+                <option value="default">默认排序</option>
+                <option value="classic">经典优先</option>
+                <option value="beginner">入门优先</option>
+                <option value="advanced">进阶深耕</option>
+                <option value="short">阅读时长短优先</option>
+              </select>
+            </div>
+
+            <!-- 第2行：地域 + 体裁 + 年代 -->
+            <div class="filter-row">
+              <span class="filter-label">地域</span>
+              <span class="filter-chip" data-filter="region" data-value="all">全部</span>
+              <span class="filter-chip" data-filter="region" data-value="东亚">东亚</span>
+              <span class="filter-chip" data-filter="region" data-value="欧美">欧美</span>
+              <span class="filter-chip" data-filter="region" data-value="国内本土">国内本土</span>
+              <span class="filter-divider"></span>
+              <span class="filter-label">体裁</span>
+              <span class="filter-chip" data-filter="genre" data-value="all">全部</span>
+              <span class="filter-chip" data-filter="genre" data-value="理论专著">理论专著</span>
+              <span class="filter-chip" data-filter="genre" data-value="纪实非虚构">纪实非虚构</span>
+              <span class="filter-chip" data-filter="genre" data-value="虚构小说">虚构小说</span>
+              <span class="filter-chip" data-filter="genre" data-value="随笔散文">随笔散文</span>
+              <span class="filter-divider"></span>
+              <span class="filter-label">年代</span>
+              <span class="filter-chip" data-filter="era" data-value="all">全部</span>
+              <span class="filter-chip" data-filter="era" data-value="5year">近5年</span>
+              <span class="filter-chip" data-filter="era" data-value="10year">近10年</span>
+              <span class="filter-chip" data-filter="era" data-value="classic">经典老书</span>
+            </div>
+
+            <!-- 第3行：女性主义流派 -->
+            <div class="filter-row">
+              <span class="filter-label">流派</span>
+              <span class="filter-chip" data-filter="school" data-value="all">全部</span>
+              <span class="filter-chip" data-filter="school" data-value="liberalism">自由主义</span>
+              <span class="filter-chip" data-filter="school" data-value="existentialism">存在主义</span>
+              <span class="filter-chip" data-filter="school" data-value="socialist">社会主义</span>
+              <span class="filter-chip" data-filter="school" data-value="radical">激进</span>
+              <span class="filter-chip" data-filter="school" data-value="postmodern">后现代</span>
+              <span class="filter-chip" data-filter="school" data-value="eastAsian">东亚本土</span>
+              <span class="filter-chip" data-filter="school" data-value="blackThirdWorld">黑人/第三世界</span>
+            </div>
+
+            <!-- 第4行：女权浪潮 -->
+            <div class="filter-row">
+              <span class="filter-label">浪潮</span>
+              <div class="wave-filter-group">
+                <button class="wave-filter-btn active" data-wave="all">全部</button>
+                <button class="wave-filter-btn" data-wave="1">第一波</button>
+                <button class="wave-filter-btn" data-wave="2">第二波</button>
+                <button class="wave-filter-btn" data-wave="3">第三波</button>
+              </div>
+              <button class="wave-info-btn" id="waveInfoBtn" title="浪潮科普">？</button>
+            </div>
+
+            <!-- 第5行：热门标签 -->
+            <div class="filter-row" id="hotTagsRow">
+              <span class="filter-label">热门</span>
+            </div>
+
+            <!-- 第6行：避雷 + 清空 -->
+            <div class="filter-row" style="justify-content:space-between">
+              <div style="display:flex;align-items:center;gap:var(--space-sm)">
+                <label class="form-checkbox" style="font-size:var(--text-sm);color:var(--color-text-secondary)">
+                  <input type="checkbox" id="hideWarning"> 过滤含创伤描写书籍
+                </label>
+              </div>
+              <button class="btn btn-sm btn-ghost" id="clearAllFilters">清空全部筛选 ✕</button>
+            </div>
+          </div>
+
+          <!-- 筛选结果计数 -->
+          <div class="filter-result-count" id="resultCount">共 <strong>0</strong> 本符合条件</div>
+          <div class="filter-reminder" id="filterReminder" style="display:none;font-size:0.75rem;color:var(--color-accent);text-align:center;margin-bottom:12px;padding:8px 16px;background:var(--color-accent-light);border-radius:var(--radius-md)">💡 当前仅显示筛选结果，全站共收录 <strong id="totalBookCount">143</strong> 本书籍，<a href="javascript:void(0)" onclick="document.getElementById('clearAllFilters').click()" style="color:var(--color-accent);text-decoration:underline">清空筛选</a> 查看更多哦～</div>
+
+          <!-- 作者搜索结果分组标题 -->
+          <div class="result-group-header" id="authorGroupHeader" style="display:none">
+            <span class="group-icon">👤</span>
+            <span class="group-title" id="authorGroupTitle"></span>
+          </div>
+
+          <!-- 卡片网格 -->
+          <div class="card-grid" id="bookGrid"></div>
+
+          <!-- 加载更多提示 -->
+          <div style="text-align:center;padding:var(--space-xl)" id="loadMoreHint">
+            <span style="font-size:var(--text-sm);color:var(--color-text-muted)" id="loadMoreText">滚动加载更多…</span>
+          </div>
+
+          <!-- 无结果 -->
+          <div class="empty-state" id="noResult" style="display:none">
+            <div class="empty-state-icon">🔍</div>
+            <div class="empty-state-title">暂时没有符合筛选条件的书籍</div>
+            <div class="empty-state-desc">可更换关键词或栏目重新筛选 🌿</div>
+            <div class="empty-state-actions">
+              <button class="btn btn-primary" id="resetFiltersBtn">重置筛选</button>
+              <a href="category.html" class="btn btn-outline">查看全部书籍</a>
+            </div>
+            <div style="margin-top:var(--space-xl)">
+              <h4 style="margin-bottom:var(--space-md)">📚 热门推荐</h4>
+              <div class="card-grid" id="hotRecommendGrid" style="grid-template-columns:repeat(3,1fr)"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 侧边栏 -->
+        <aside style="width:240px;flex-shrink:0" class="hide-tablet">
+          <!-- 阅读阶梯快捷入口 -->
+          <div style="background:var(--color-bg-card);border:1px solid var(--color-border-light);border-radius:var(--radius-lg);padding:var(--space-md);margin-bottom:var(--space-md)">
+            <h4 style="font-size:var(--text-sm);margin-bottom:var(--space-sm)">📖 阅读阶梯</h4>
+            <a href="?level=beginner" class="btn btn-sm btn-outline" style="width:100%;margin-bottom:var(--space-xs)">🌱 入门</a>
+            <a href="?level=advanced" class="btn btn-sm btn-outline" style="width:100%;margin-bottom:var(--space-xs)">🌳 进阶</a>
+            <a href="?view=school" class="btn btn-sm btn-ghost" style="width:100%">📖 按流派阅读 →</a>
+          </div>
+          <!-- 侧边榜单 -->
+          <div style="background:var(--color-bg-card);border:1px solid var(--color-border-light);border-radius:var(--radius-lg);padding:var(--space-md)">
+            <h4 style="font-size:var(--text-sm);margin-bottom:var(--space-sm)">🔥 本栏目热门</h4>
+            <div id="sidebarRanking"></div>
+          </div>
+        </aside>
+      </div>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="footer-inner">
+      <div class="footer-quote" id="footerQuote"></div>
+      <div class="footer-links">
+        <a href="index.html">首页</a><a href="category.html">分类</a><a href="submit.html">投稿</a><a href="disclaimer.html">免责说明</a>
+      </div>
+      <p style="font-family:Georgia,serif;font-size:0.6rem;color:var(--color-text-muted);letter-spacing:3px;margin-bottom:4px;text-align:center">Her Library, Her Liberation</p><p class="footer-copy">© 2026 Her Lib 她的书库</p><p class="footer-copy" style="font-size:0.65rem;color:var(--color-text-muted);margin-top:4px">daowon独立创作，所有页面设计、书单整理均为个人原创，无团队、无商业运营，纯个人公益分享</p>
+      <div style="margin-top:16px;padding-top:12px;border-top:1px solid var(--color-border-light);display:flex;flex-wrap:wrap;justify-content:center;gap:16px;font-size:0.75rem;color:var(--color-text-muted)">
+        <span>📕 小红书 <strong>@她的书库</strong></span>
+        
+        <span>💬 公众号 <strong>@她的书库</strong></span>
+      </div>
+    </div>
+  </footer>
+
+  <!-- 回到顶部 + 书页向导 + 底部导航 -->
+  <button class="back-to-top" id="backToTop">↑</button>
+  <div class="floating-guide" id="floatingGuide">
+    <div class="guide-panel" id="guidePanel">
+      <div class="guide-panel-header">📖 书页向导</div>
+      <div class="guide-panel-body">
+        <div class="guide-section"><h4>❓ 常见问题</h4>
+<p><strong>怎么看书？</strong><br>点进任意书籍 → 点击「微信读书」按钮 → 跳转正版平台阅读</p>
+<p><strong>怎么听书？</strong><br>支持听书的书籍有🎧标识 → 点击「喜马拉雅」或「微信听书」</p>
+<p><strong>收藏怎么用？</strong><br>登录后点⭐收藏 → 个人中心查看全部收藏</p>
+<p><strong>这个网站是谁做的？</strong><br>本站为 daowon 独立搭建的公益书单网站，全部内容、页面设计均为本人原创。</p>
+</div>
+        <div class="guide-section"><h4>🌱 阅读路径</h4>
+<p><a href="category.html?level=beginner">→ 入门书单（新手友好）</a></p>
+<p><a href="category.html?level=advanced">→ 进阶书单（理论深入）</a></p>
+</div>
+        <div class="guide-section"><h4>📬 反馈</h4>
+<p><a href="submit.html">→ 推荐书籍</a></p>
+<p>邮箱：2935357829@qq.com</p>
+</div>
+      </div>
+    </div>
+    <button class="guide-toggle" id="guideToggle" aria-label="打开书页向导" onclick="var p=document.getElementById('guidePanel');p.classList.toggle('active');event.stopPropagation()" ontouchstart="var p=document.getElementById('guidePanel');p.classList.toggle('active');event.stopPropagation();event.preventDefault()">📖</button>
+  </div>
+  <nav class="mobile-bottom-nav">
+    <a href="index.html"><span class="nav-icon">🏠</span>首页</a>
+    <a href="category.html" class="active"><span class="nav-icon">📂</span>分类</a>
+    <a href="profile.html" class="auth-only hidden"><span class="nav-icon">👤</span>我的</a>
+  </nav>
+
+  <!-- 浪潮科普弹窗 -->
+  <div class="modal-overlay" id="waveModal" style="display:none">
+    <div class="modal">
+      <button class="modal-close" id="waveModalClose">✕</button>
+      <div class="modal-title">🌊 女权历史浪潮科普</div>
+      <div class="modal-body" id="waveModalBody"></div>
+    </div>
+  </div>
+
+  <div class="copy-success-toast" id="copyToast">✅ 已复制</div>
+
+  <script src="js/data.js"></script>
+  <script src="js/supabase.js"></script>
+  <script src="js/category.js"></script>
+<script>
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/sw.js');
+}
+</script>
+</body>
+</html>

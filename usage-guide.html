@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="light">
+<head><base href="/HerLib/">
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>网站使用须知 | Her Lib 她的书库</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<nav class="nav scrolled"><div class="nav-inner">
+<a href="index.html" class="nav-logo"><span style="font-family:Georgia,serif;font-size:1.3rem;font-weight:700;color:var(--color-accent)">📖 Her Lib</span><span style="font-size:0.7rem;color:var(--color-text-muted);margin-left:6px">她的书库</span></a>
+<div class="nav-links"><a href="index.html">首页</a><a href="category.html">分类</a><a href="submit.html">投稿</a><a href="disclaimer.html">关于</a></div></div></nav>
+
+<main class="page-content"><div class="container container-narrow">
+<div class="breadcrumb"><a href="index.html">首页</a><span class="separator">›</span><span>网站使用须知</span></div>
+<h2>📋 网站使用须知</h2>
+
+<h3>一、本地书架与隐私</h3>
+<p style="line-height:2;color:var(--color-text-secondary)">你的收藏、阅读进度、读书笔记、评论等个人数据，全部保存在你当前使用的浏览器本地缓存中。本站没有服务器数据库，不会收集、上传、分享你的任何个人信息。更换浏览器或清除浏览器数据后，之前的收藏和笔记会丢失。</p>
+
+<h3>二、登录机制</h3>
+<p style="line-height:2;color:var(--color-text-secondary)">登录仅需邮箱和密码，用于跨设备同步收藏数据（通过Firebase加密传输）。不收集手机号、真实姓名等隐私信息。你的阅读记录仅本人可见，其他用户无法查看你的收藏和笔记。</p>
+
+<h3>三、免责声明</h3>
+<p style="line-height:2;color:var(--color-text-secondary)">本站为书籍索引推荐平台，不储存任何电子书文件、音频或其他版权资源。所有阅读链接均跳转至微信读书、京东读书等官方正版平台。书籍信息由编辑团队和读者共同整理，版权归原作者及出版社所有。如有版权问题请联系我们处理。</p>
+
+<h3>四、投稿与内容审核</h3>
+<p style="line-height:2;color:var(--color-text-secondary)">读者投稿的书籍需符合本站收录标准（女性主义相关、正规出版物）。投稿内容经审核后发布，本站保留拒绝不符合标准投稿的权利。</p>
+
+<h3>五、联系方式</h3>
+<p style="line-height:2;color:var(--color-text-secondary)">邮箱：2935357829@qq.com</p>
+</div></main>
+
+<footer class="footer"><div class="footer-inner">
+<div class="footer-links"><a href="reading-channels.html">📖 阅读渠道说明</a><a href="disclaimer.html">⚖️ 版权免责声明</a><a href="usage-guide.html">📋 网站使用须知</a></div>
+<p style="font-family:Georgia,serif;font-size:0.6rem;color:var(--color-text-muted);letter-spacing:3px;margin-bottom:4px;text-align:center">Her Library, Her Liberation</p><p class="footer-copy">© 2026 Her Lib 她的书库</p><p class="footer-copy" style="font-size:0.65rem;color:var(--color-text-muted);margin-top:4px">daowon独立创作，所有页面设计、书单整理均为个人原创，无团队、无商业运营，纯个人公益分享</p><div style="margin-top:16px;padding-top:12px;border-top:1px solid var(--color-border-light);display:flex;flex-wrap:wrap;justify-content:center;gap:16px;font-size:0.75rem;color:var(--color-text-muted)"><span>📕 小红书 <strong>@她的书库</strong></span><span>💬 公众号 <strong>@她的书库</strong></span></div></div></footer>
+
+<!-- 悬浮书页向导 -->
+<div class="floating-guide" id="floatingGuide">
+<div class="guide-panel" id="guidePanel">
+<div class="guide-panel-header">📖 书页向导</div>
+<div class="guide-panel-body">
+<div class="guide-section"><h4>❓ 常见问题</h4>
+<p><strong>怎么看书？</strong><br>点进任意书籍 → 点击「微信读书」按钮 → 跳转正版平台阅读</p>
+<p><strong>图书馆免费借阅？</strong><br>见底部<a href="reading-channels.html">阅读渠道说明</a></p>
+<p><strong>这个网站是谁做的？</strong><br>本站为 daowon 独立搭建的公益书单网站，全部内容、页面设计均为本人原创。</p>
+</div>
+<div class="guide-section"><h4>🌱 阅读路径</h4>
+<p><a href="category.html?level=beginner">→ 入门书单（新手友好）</a></p>
+<p><a href="category.html?level=advanced">→ 进阶书单（理论深入）</a></p>
+</div>
+<div class="guide-section"><h4>📬 反馈</h4>
+<p>邮箱：2935357829@qq.com</p>
+</div></div></div>
+<button class="guide-toggle" id="guideToggle" aria-label="打开书页向导" onclick="var p=document.getElementById('guidePanel');p.classList.toggle('active');event.stopPropagation()" ontouchstart="var p=document.getElementById('guidePanel');p.classList.toggle('active');event.stopPropagation();event.preventDefault()">📖</button></div>
+</body></html>

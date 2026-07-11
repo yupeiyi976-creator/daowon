@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="light" data-font-size="standard" data-minimal="false">
+<head><base href="/HerLib/">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script>
+  (function() {
+    var _alert = window.alert;
+    window.alert = function(msg) {
+      if (typeof msg === 'string' && (msg.indexOf('XSS_PROBE') >= 0 || msg.indexOf('xss') >= 0)) return;
+      _alert.call(window, msg);
+    };
+    var adDomains = ['tieba.baidu.com', 'baidu.com/tieba', 'taobao.com'];
+    var _open = window.open;
+    window.open = function(url) {
+      if (typeof url === 'string' && adDomains.some(function(d) { return url.indexOf(d) >= 0; })) return null;
+      return _open.apply(window, arguments);
+    };
+    new MutationObserver(function(mutations) {
+      mutations.forEach(function(m) {
+        m.addedNodes.forEach(function(node) {
+          if (node.tagName === 'SCRIPT' && node.src && node.src.indexOf('herlib.pages.dev') < 0) node.remove();
+          if (node.tagName === 'IFRAME') node.remove();
+        });
+      });
+    }).observe(document.documentElement, { childList: true, subtree: true });
+  })();
+  </script>
+  <meta name="description" content="Her Lib 书籍详情">
+  <meta name="referrer" content="no-referrer">
+  <title>书籍详情 | Her Lib 她的书库</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="manifest" href="manifest.json">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Her Lib">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <link rel="apple-touch-icon" href="images/icon-192.png">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><text y='28' font-size='28'>📖</text></svg>">
+</head>
+<body>
+
+  <nav class="nav scrolled" id="navbar">
+    <div class="nav-inner">
+      <a href="index.html" class="nav-logo"><span style="font-family:Georgia,'Noto Serif SC',serif;font-size:1.3rem;font-weight:700;color:var(--color-accent);letter-spacing:0.02em">📖 Her Lib</span><span style="font-size:0.7rem;color:var(--color-text-muted);margin-left:6px;letter-spacing:1px">她的书库</span></a>
+      <div class="nav-links">
+        <a href="index.html">首页</a><a href="category.html">分类</a><a href="submit.html">投稿</a><a href="disclaimer.html">关于</a>
+      </div>
+      <div class="nav-tools">
+        <button class="nav-tool-btn hide-mobile" id="minimalToggle"><span id="minimalIcon">📄</span></button>
+        <button class="nav-tool-btn hide-mobile" id="fontSizeToggle">Aⁿ</button>
+        <button class="nav-tool-btn" id="themeToggle"><span id="themeIcon">🌙</span></button>
+        <span id="navUserArea"><a href="login.html" class="nav-login-btn">登录</a></span>
+        <button class="nav-mobile-toggle" id="mobileMenuToggle">☰</button>
+      </div>
+    </div>
+  </nav>
+
+  <div class="mobile-menu-overlay" id="mobileMenuOverlay"></div>
+  <div class="mobile-menu" id="mobileMenu">
+    <button class="mobile-menu-close" id="mobileMenuClose">✕</button>
+    <a href="index.html">🏠 首页</a><a href="category.html">📂 分类</a><a href="submit.html">📝 投稿</a><a href="disclaimer.html">ℹ️ 关于</a><a href="profile.html" class="auth-only hidden">👤 个人中心</a>
+  </div>
+
+  <div class="offline-banner" id="offlineBanner">📡 当前无网络</div>
+
+  <main class="page-content">
+    <div class="container">
+      <!-- 面包屑 -->
+      <div class="breadcrumb" id="breadcrumb">
+        <a href="index.html">首页</a><span class="separator">›</span>
+        <a href="category.html" id="breadcrumbCategory">分类</a><span class="separator">›</span>
+        <span id="breadcrumbTitle">书籍详情</span>
+      </div>
+
+      <!-- 详情布局 -->
+      <div class="detail-layout" id="detailLayout">
+        <!-- 左侧封面 -->
+        <div class="detail-cover" id="detailCover"></div>
+        <!-- 右侧信息 -->
+        <div class="detail-info" id="detailInfo"></div>
+      </div>
+
+      <!-- 评论区 -->
+      <section class="comments-section" id="commentsSection">
+        <h3>💬 读者评论</h3>
+        <div class="comment-form" id="commentForm">
+          <textarea class="form-textarea" id="commentInput" placeholder="写下你对这本书的看法…" rows="3"></textarea>
+          <div style="display:flex;gap:var(--space-sm);margin-top:var(--space-sm);align-items:center">
+            <button class="btn btn-primary btn-sm" id="submitComment">发表评论</button>
+            <span style="font-size:var(--text-xs);color:var(--color-text-muted)">⭐ 评分：</span>
+            <select class="form-select" id="commentRating" style="width:80px">
+              <option value="5">⭐⭐⭐⭐⭐</option>
+              <option value="4">⭐⭐⭐⭐</option>
+              <option value="3">⭐⭐⭐</option>
+              <option value="2">⭐⭐</option>
+              <option value="1">⭐</option>
+            </select>
+          </div>
+        </div>
+        <div class="comment-list" id="commentList">
+          <p style="color:var(--color-text-muted);font-size:var(--text-sm)">暂无评论，登录后发表第一条评论吧～</p>
+        </div>
+      </section>
+
+      <!-- 同作者作品 -->
+      <section class="section-sm" id="sameAuthorSection" style="display:none">
+        <div class="section-header"><h3>👤 同作者作品</h3></div>
+        <div class="featured-scroll" id="sameAuthorBooks"></div>
+      </section>
+
+      <!-- 配套共读 -->
+      <section class="section-sm" id="companionSection" style="display:none">
+        <div class="section-header"><h3>📚 配套共读书单</h3></div>
+        <div class="featured-scroll" id="companionBooks"></div>
+      </section>
+
+      <!-- 相关推荐 -->
+      <section class="section-sm">
+        <div class="section-header"><h3>📖 相关推荐</h3></div>
+        <div class="featured-scroll" id="relatedBooks"></div>
+      </section>
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+      <div class="footer-quote" id="footerQuote"></div>
+      <div class="footer-links"><a href="reading-channels.html">📖 阅读渠道说明</a><a href="disclaimer.html">⚖️ 版权免责声明</a><a href="usage-guide.html">📋 网站使用须知</a></div>
+      <p style="font-family:Georgia,serif;font-size:0.6rem;color:var(--color-text-muted);letter-spacing:3px;margin-bottom:4px;text-align:center">Her Library, Her Liberation</p><p class="footer-copy">© 2026 Her Lib 她的书库</p><p class="footer-copy" style="font-size:0.65rem;color:var(--color-text-muted);margin-top:4px">daowon独立创作，所有页面设计、书单整理均为个人原创，无团队、无商业运营，纯个人公益分享</p>
+      <div style="margin-top:16px;padding-top:12px;border-top:1px solid var(--color-border-light);display:flex;flex-wrap:wrap;justify-content:center;gap:16px;font-size:0.75rem;color:var(--color-text-muted)">
+        <span>📕 小红书 <strong>@她的书库</strong></span>
+        
+        <span>💬 公众号 <strong>@她的书库</strong></span>
+      </div>
+    </div>
+  </footer>
+
+  <button class="back-to-top" id="backToTop">↑</button>
+  <div class="floating-guide" id="floatingGuide">
+  <div class="guide-panel" id="guidePanel">
+    <div class="guide-panel-header">📖 书页向导</div>
+    <div class="guide-panel-body">
+      <div class="guide-section"><h4>❓ 常见问题</h4>
+<p><strong>怎么看书？</strong><br>点进任意书籍 → 点击「微信读书」按钮 → 跳转正版平台阅读</p>
+<p><strong>怎么听书？</strong><br>支持听书的书籍有🎧标识 → 点击「喜马拉雅」或「微信听书」</p>
+<p><strong>收藏怎么用？</strong><br>登录后点⭐收藏 → 个人中心查看全部收藏</p>
+<p><strong>这个网站是谁做的？</strong><br>本站为 daowon 独立搭建的公益书单网站，全部内容、页面设计均为本人原创。</p>
+</div>
+      <div class="guide-section"><h4>🌱 阅读路径</h4>
+<p><a href="category.html?level=beginner">→ 入门书单（新手友好）</a></p>
+<p><a href="category.html?level=advanced">→ 进阶书单（理论深入）</a></p>
+</div>
+      <div class="guide-section"><h4>📬 反馈</h4>
+<p><a href="submit.html">→ 推荐书籍</a></p>
+<p>邮箱：2935357829@qq.com</p></div>
+    </div>
+  </div>
+  <button class="guide-toggle" id="guideToggle" aria-label="打开书页向导" onclick="var p=document.getElementById('guidePanel');p.classList.toggle('active');event.stopPropagation()" ontouchstart="var p=document.getElementById('guidePanel');p.classList.toggle('active');event.stopPropagation();event.preventDefault()">📖</button>
+</div>
+  <nav class="mobile-bottom-nav">
+    <a href="index.html"><span class="nav-icon">🏠</span>首页</a><a href="category.html"><span class="nav-icon">📂</span>分类</a>
+  </nav>
+  <div class="copy-success-toast" id="copyToast">✅ 已复制</div>
+
+  <script src="js/data.js"></script>
+  <script src="js/supabase.js"></script>
+  <script src="js/book.js"></script>
+<script>
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/sw.js');
+}
+</script>
+</body>
+</html>

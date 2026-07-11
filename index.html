@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="light" data-font-size="standard" data-minimal="false">
+<head><base href="/HerLib/">
+  <!-- Her Lib 她的书库 · daowon 独立创作 -->
+  <meta charset="UTF-8">
+  <meta name="author" content="daowon">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "name": "Her Lib 她的书库",
+    "url": "https://herlib.pages.dev",
+    "description": "为刚入门女性主义的读者打造的书籍索引网站",
+    "author": { "@type": "Person", "name": "daowon" }
+  }
+  </script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Her Lib 她的书库——为刚入门女性主义的读者打造的系统化书籍索引网站。支持分类筛选、全站搜索、人文导读、正版阅读外链跳转。">
+  <meta name="referrer" content="no-referrer">
+  <title>Her Lib 她的书库 — 女性主义书籍索引</title>
+  <link rel="stylesheet" href="css/style.css?v=2">
+  <link rel="manifest" href="manifest.json">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Her Lib 她的书库">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <link rel="apple-touch-icon" href="images/icon-192.png">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><text y='28' font-size='28'>📚</text></svg>">
+</head>
+<body>
+
+  <!-- 导航栏 -->
+  <nav class="nav" id="navbar">
+    <div class="nav-inner">
+      <a href="index.html" class="nav-logo" aria-label="Her Lib 她的书库 首页">
+        <span style="font-family:Georgia,'Noto Serif SC',serif;font-size:1.3rem;font-weight:700;color:var(--color-accent);letter-spacing:0.02em">📖 Her Lib</span><span style="font-size:0.7rem;color:var(--color-text-muted);margin-left:6px;letter-spacing:1px">她的书库</span>
+      </a>
+      <div class="nav-links">
+        <a href="index.html" class="active">首页</a>
+        <a href="category.html">分类</a>
+        <a href="submit.html">投稿</a>
+        <a href="disclaimer.html">关于</a>
+      </div>
+      <div class="nav-tools">
+        <!-- 极简阅读模式 -->
+        <button class="nav-tool-btn hide-mobile" id="minimalToggle" title="极简阅读模式" aria-label="切换极简阅读模式">
+          <span id="minimalIcon">📄</span>
+        </button>
+        <!-- 字号缩放 -->
+        <button class="nav-tool-btn hide-mobile" id="fontSizeToggle" title="字号缩放" aria-label="切换字号">
+          <span>Aⁿ</span>
+        </button>
+        <!-- 深色模式 -->
+        <button class="nav-tool-btn" id="themeToggle" title="切换深色/浅色模式" aria-label="切换深色浅色模式">
+          <span id="themeIcon">🌙</span>
+        </button>
+        <!-- 登录/用户 -->
+        <span id="navUserArea">
+          <a href="login.html" class="nav-login-btn">登录</a>
+        </span>
+        <!-- 移动端菜单按钮 -->
+        <button class="nav-mobile-toggle" id="mobileMenuToggle" aria-label="打开菜单">
+          ☰
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- 移动端侧滑菜单 -->
+  <div class="mobile-menu-overlay" id="mobileMenuOverlay"></div>
+  <div class="mobile-menu" id="mobileMenu">
+    <button class="mobile-menu-close" id="mobileMenuClose">✕</button>
+    <a href="index.html" class="active">🏠 首页</a>
+    <a href="category.html">📂 分类浏览</a>
+    <a href="submit.html">📝 投稿书籍</a>
+    <a href="disclaimer.html">ℹ️ 关于我们</a>
+    <a href="profile.html" class="auth-only hidden">👤 个人中心</a>
+    <a href="admin.html" class="admin-only hidden">⚙️ 管理后台</a>
+  </div>
+
+  <!-- 离线提示条 -->
+  <div class="offline-banner" id="offlineBanner">
+    📡 当前无网络，仅可浏览缓存内容，提交功能暂时禁用
+  </div>
+
+  <!-- Hero 区 -->
+  <section class="hero">
+    <div class="hero-bg hero-decoration">
+      <svg class="wave-top" viewBox="0 0 1440 120" preserveAspectRatio="none">
+        <path d="M0 60 C360 0, 720 120, 1080 40 S1440 80, 1440 60 L1440 0 L0 0 Z" fill="currentColor"/>
+      </svg>
+      <svg class="circle-1" viewBox="0 0 100 100">
+        <circle cx="50" cy="50" r="48" fill="none" stroke="currentColor" stroke-width="1.5" stroke-dasharray="8 6"/>
+      </svg>
+      <svg class="circle-2" viewBox="0 0 100 100">
+        <circle cx="50" cy="50" r="48" fill="none" stroke="currentColor" stroke-width="1.5" stroke-dasharray="12 8"/>
+      </svg>
+    </div>
+    <div class="hero-content">
+      <h1 class="hero-title">Her Lib 她的书库</h1>
+      <p class="hero-subtitle">
+        为每一位刚刚推开女性主义之门的读者，<br>整理一份温柔、系统、可依赖的阅读地图。
+      </p>
+      <div class="hero-search">
+        <input type="text" id="heroSearch" placeholder="搜索书名、作者、关键词、理论流派" aria-label="全站搜索">
+        <button id="heroSearchBtn" aria-label="搜索">🔍</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- 栏目导航 -->
+  <section class="section-sm">
+    <div class="container">
+      <div class="category-cards" id="categoryCards">
+        <!-- JS 动态生成 -->
+      </div>
+    </div>
+  </section>
+
+  <div class="section-divider">
+    <svg viewBox="0 0 40 12"><path d="M0 6 Q10 0 20 6 Q30 12 40 6" fill="none" stroke="currentColor" stroke-width="1"/></svg>
+  </div>
+
+  <!-- 精选推荐 -->
+  <section class="section-sm">
+    <div class="container">
+      <div class="section-header">
+        <h2>✨ 精选推荐</h2>
+        <a href="category.html" class="section-link">查看全部 →</a>
+      </div>
+      <div class="featured-scroll" id="featuredBooks">
+        <!-- JS 动态生成 -->
+      </div>
+    </div>
+  </section>
+
+  <!-- 阅读阶梯导航 -->
+  <section class="section-sm">
+    <div class="container">
+      <div class="section-header">
+        <h2>📖 阅读阶梯</h2>
+      </div>
+      <div class="reading-ladder">
+        <a href="category.html?level=beginner" class="ladder-card beginner">
+          <div class="ladder-icon">🌱</div>
+          <div class="ladder-content">
+            <h3>入门阶梯</h3>
+            <p>篇幅轻薄、对话体、随笔通俗文本，零基础读者可直接阅读</p>
+          </div>
+        </a>
+        <a href="category.html?level=advanced" class="ladder-card advanced">
+          <div class="ladder-icon">🌳</div>
+          <div class="ladder-content">
+            <h3>进阶阶梯</h3>
+            <p>偏学术理论、逻辑密度高，建议读完入门书目后再阅读</p>
+          </div>
+        </a>
+      </div>
+      <div style="text-align:center;margin-top:var(--space-lg)">
+        <a href="category.html?view=school" class="btn btn-outline">按流派阅读 →</a>
+        <a href="category.html?view=wave" class="btn btn-outline" style="margin-left:var(--space-sm)">按历史浪潮浏览 →</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- 月度阅读随笔 -->
+  <section class="section-sm">
+    <div class="container">
+      <div class="section-header">
+        <h2>📅 月度随笔</h2>
+      </div>
+      <div class="detail-quote" id="monthlyQuote">
+        <!-- JS 动态生成 -->
+      </div>
+    </div>
+  </section>
+
+  <!-- 全站自动榜单 -->
+  <section class="section-sm">
+    <div class="container">
+      <div class="section-header">
+        <h2>🏆 全站榜单</h2>
+      </div>
+      <div class="ranking-grid">
+        <div class="stat-card" id="rankingHot">
+          <h4 style="margin-bottom:var(--space-md)">🔥 热门收藏榜</h4>
+          <div id="hotRankingList"><p style="font-size:var(--text-sm);color:var(--color-text-muted)">加载中…</p></div>
+        </div>
+        <div class="stat-card" id="rankingComments">
+          <h4 style="margin-bottom:var(--space-md)">💬 高评论榜</h4>
+          <div id="commentRankingList"><p style="font-size:var(--text-sm);color:var(--color-text-muted)">加载中…</p></div>
+        </div>
+        <div class="stat-card" id="rankingBeginner">
+          <h4 style="margin-bottom:var(--space-md)">🌱 新手友好榜</h4>
+          <div id="beginnerRankingList"><p style="font-size:var(--text-sm);color:var(--color-text-muted)">加载中…</p></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 年度阅读计划 -->
+  <section class="section-sm">
+    <div class="container">
+      <div class="section-header">
+        <h2>📅 年度阅读计划</h2>
+        <button class="btn btn-sm btn-outline" id="planBatchCollect">一键批量收藏全年书单</button>
+      </div>
+      <div class="reading-plan" id="readingPlan">
+        <!-- JS 动态生成 -->
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="footer-inner">
+      <div class="footer-quote" id="footerQuote">" Feminism is the radical notion that women are people. "</div>
+      <div class="footer-links">
+        <a href="index.html">首页</a>
+        <a href="category.html">分类浏览</a>
+        <a href="submit.html">投稿书籍</a>
+        <a href="disclaimer.html">免责说明</a>
+      </div>
+      <!-- 联系与反馈 -->
+      <div style="max-width:500px;margin:24px auto;padding:20px 24px;background:var(--color-bg-card);border:1px solid var(--color-border);border-radius:var(--radius-lg);text-align:left">
+        <h4 style="margin-bottom:12px;font-size:0.95rem">📬 联系与反馈</h4>
+        <p style="font-size:0.8rem;color:var(--color-text-secondary);margin-bottom:12px">有书籍推荐、功能建议或发现链接失效？欢迎告诉我们～</p>
+        <form id="feedbackForm" style="display:flex;flex-direction:column;gap:8px">
+          <select class="form-select" id="feedbackType" style="font-size:0.85rem">
+            <option value="💡 功能建议">💡 功能建议</option>
+            <option value="📚 推荐书籍">📚 推荐书籍</option>
+            <option value="🐛 链接失效/问题反馈">🐛 链接失效/问题反馈</option>
+            <option value="💬 其他">💬 其他</option>
+          </select>
+          <textarea class="form-textarea" id="feedbackMsg" rows="3" placeholder="写下你想说的话…" style="font-size:0.85rem;min-height:70px" required></textarea>
+          <button type="submit" class="btn btn-primary btn-sm" style="align-self:flex-end">发送反馈 ✉️</button>
+        </form>
+        <p style="font-size:0.7rem;color:var(--color-text-muted);margin-top:8px">也可直接发邮件：2935357829@qq.com</p>
+      </div>
+      <script>
+      document.getElementById('feedbackForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        var btn = this.querySelector('button');
+        var type = document.getElementById('feedbackType').value;
+        var msg = document.getElementById('feedbackMsg').value.trim();
+        if (!msg) return;
+        btn.disabled = true; btn.textContent = '发送中…';
+        try {
+          var resp = await fetch('/api/feedbacks', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ type: type, message: msg })
+          });
+          if (resp.ok) {
+            document.getElementById('feedbackMsg').value = '';
+            alert('✅ 反馈已收到！感谢你的建议～');
+          } else {
+            throw new Error('fail');
+          }
+        } catch(err) {
+          // fallback: 也存 localStorage
+          var fbs = JSON.parse(localStorage.getItem('herlib-feedbacks') || '[]');
+          fbs.push({ type: type, message: msg, time: new Date().toISOString() });
+          localStorage.setItem('herlib-feedbacks', JSON.stringify(fbs));
+          alert('✅ 反馈已保存到本地！（网络原因未同步到云端）');
+        }
+        btn.disabled = false; btn.textContent = '发送反馈 ✉️';
+      });
+      </script>
+      </div>
+      <p style="font-family:Georgia,serif;font-size:0.6rem;color:var(--color-text-muted);letter-spacing:3px;margin-bottom:4px;text-align:center">Her Library, Her Liberation</p><p class="footer-copy">© 2026 Her Lib 她的书库 · 为女性主义阅读而建 · 本站不存储任何书籍文件，仅提供正版阅读渠道索引</p><p class="footer-copy" style="font-size:0.65rem;color:var(--color-text-muted);margin-top:4px">daowon独立创作，所有页面设计、书单整理均为个人原创，无团队、无商业运营，纯个人公益分享</p>
+      <div style="margin-top:16px;padding-top:12px;border-top:1px solid var(--color-border-light);display:flex;flex-wrap:wrap;justify-content:center;gap:16px;font-size:0.75rem;color:var(--color-text-muted)">
+        <span>📕 小红书 <strong>@她的书库</strong></span>
+        
+        <span>💬 公众号 <strong>@她的书库</strong></span>
+      </div>
+    </div>
+  </footer>
+
+  <!-- 回到顶部 -->
+  <button class="back-to-top" id="backToTop" aria-label="回到顶部">↑</button>
+
+  <!-- 悬浮书页向导 -->
+  <div class="floating-guide" id="floatingGuide">
+    <div class="guide-panel" id="guidePanel">
+      <div class="guide-panel-header">📖 书页向导</div>
+      <div class="guide-panel-body">
+        <div class="guide-section">
+          <h4>❓ 常见问题</h4>
+          <p><strong>怎么看书？</strong><br>点进任意书籍 → 点击「微信读书」按钮 → 跳转正版平台阅读</p>
+          <p><strong>怎么听书？</strong><br>支持听书的书籍有🎧标识 → 点击「喜马拉雅」或「微信听书」</p>
+          <p><strong>图书馆免费借阅？</strong><br>见底部<a href="reading-channels.html">阅读渠道说明</a></p>
+          <p><strong>收藏怎么用？</strong><br>登录后点⭐收藏 → 个人中心查看全部收藏</p>
+          <p><strong>这个网站是谁做的？</strong><br>本站为 daowon 独立搭建的公益书单网站，全部内容、页面设计均为本人原创。</p>
+        </div>
+        <div class="guide-section">
+          <h4>🌱 阅读路径</h4>
+          <p><a href="category.html?level=beginner">→ 入门书单（新手友好）</a></p>
+          <p><a href="category.html?level=advanced">→ 进阶书单（理论深入）</a></p>
+          <p><a href="category.html?category=thought">→ 思潮漫步（系统入门）</a></p>
+        </div>
+        <div class="guide-section">
+          <h4>📬 反馈</h4>
+          <p><a href="submit.html">→ 推荐书籍</a></p>
+          <p>邮箱：2935357829@qq.com</p>
+        </div>
+      </div>
+    </div>
+    <button class="guide-toggle" id="guideToggle" aria-label="打开书页向导" onclick="var p=document.getElementById('guidePanel');p.classList.toggle('active');event.stopPropagation()" ontouchstart="var p=document.getElementById('guidePanel');p.classList.toggle('active');event.stopPropagation();event.preventDefault()">📖</button>
+  </div>
+
+  <!-- 移动端底部导航 -->
+  <nav class="mobile-bottom-nav" id="mobileBottomNav">
+    <a href="index.html" class="active"><span class="nav-icon">🏠</span>首页</a>
+    <a href="category.html"><span class="nav-icon">📂</span>分类</a>
+    <a href="profile.html" class="auth-only hidden"><span class="nav-icon">👤</span>我的</a>
+      </nav>
+
+  <!-- 复制成功提示 -->
+  <div class="copy-success-toast" id="copyToast">✅ 已复制到剪贴板</div>
+
+  <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
+  <script src="js/data.js"></script>
+  <script src="js/supabase.js"></script>
+  <script src="js/main.js"></script>
+<script>
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/sw.js');
+}
+</script>
+</body>
+</html>

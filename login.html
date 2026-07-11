@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="light">
+<head><base href="/HerLib/">
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>登录 | Her Lib 她的书库</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div class="auth-page">
+<div class="auth-card">
+  <h2 id="pageTitle">📚 Her Lib</h2>
+  <p style="text-align:center;color:var(--color-text-secondary);font-size:0.85rem;margin-bottom:16px">登录以使用收藏、笔记、投稿等功能</p>
+  <div id="loginArea">
+    <div class="form-group">
+      <label class="form-label">邮箱</label>
+      <input type="email" class="form-input" id="email" placeholder="your@email.com" autocomplete="email">
+    </div>
+    <div class="form-group">
+      <label class="form-label">密码</label>
+      <input type="password" class="form-input" id="password" placeholder="6位以上密码" autocomplete="new-password">
+    </div>
+    <div id="msg" style="display:none;padding:10px;border-radius:8px;margin-bottom:12px;font-size:0.85rem"></div>
+    <div style="display:flex;gap:10px">
+      <button type="button" id="loginBtn" class="btn btn-primary" style="flex:1;padding:14px;font-size:1rem">登 录</button>
+      <button type="button" id="registerBtn" class="btn btn-outline" style="flex:1;padding:14px;font-size:1rem">注 册</button>
+    </div>
+    <p style="font-size:0.75rem;color:var(--color-text-muted);text-align:center;margin-top:12px">🔒 仅收集邮箱用于账号登录</p>
+  </div>
+  <p style="text-align:center;margin-top:16px"><a href="index.html">← 返回首页</a></p>
+</div>
+</div>
+
+<script>
+var msgEl = document.getElementById('msg');
+function show(t, type) {
+  msgEl.style.display = 'block'; msgEl.textContent = t;
+  msgEl.style.background = type==='error'?'rgba(196,122,106,0.12)':type==='success'?'rgba(122,154,126,0.12)':'rgba(198,123,92,0.08)';
+  msgEl.style.color = type==='error'?'#C47A6A':type==='success'?'#7A9A7E':'#C67B5C';
+}
+
+function doAuth(isReg) {
+  var e = document.getElementById('email').value.trim();
+  var p = document.getElementById('password').value;
+  if (!e||!p) { show('请填写邮箱和密码','error'); return; }
+  if (p.length<6) { show('密码至少需要6位','error'); return; }
+  if (e.indexOf('@')<0) { show('请输入有效的邮箱地址','error'); return; }
+
+  show(isReg?'⏳ 注册中...':'⏳ 登录中...', 'info');
+  setTimeout(function() {
+    try {
+      var users = JSON.parse(localStorage.getItem('herlib-users')||'{}');
+      if (isReg) {
+        if (users[e]) { show('该邮箱已注册，请直接登录','error'); return; }
+        users[e] = { password: p };
+        localStorage.setItem('herlib-users', JSON.stringify(users));
+      } else {
+        if (!users[e]) { show('该邮箱未注册，请先注册','error'); return; }
+        if (users[e].password !== p) { show('密码错误','error'); return; }
+      }
+      localStorage.setItem('herlib-demo-user', e);
+      show('✅ 成功！', 'success');
+      setTimeout(function(){ window.location.href='index.html'; }, 300);
+    } catch(ex) { show('出错：'+ex.message,'error'); }
+  }, 10);
+}
+
+document.getElementById('loginBtn').onclick = function(){ doAuth(false); };
+document.getElementById('registerBtn').onclick = function(){ doAuth(true); };
+// 已登录？
+var u = localStorage.getItem('herlib-demo-user');
+if (u) {
+  document.getElementById('pageTitle').textContent = '✅ 已登录';
+  document.getElementById('loginArea').innerHTML =
+    '<p style=text-align:center>已登录为 <strong>'+u+'</strong></p>'+
+    '<p style=text-align:center;margin-top:16px><a href=index.html class=btn.btn-primary>进入首页</a></p>'+
+    '<p style=text-align:center;margin-top:8px><a href=# onclick=localStorage.removeItem(\"herlib-demo-user\");location.reload()>退出登录</a></p>';
+}
+</script>
+<!-- 悬浮书页向导 -->
+<div class="floating-guide" id="floatingGuide">
+<div class="guide-panel" id="guidePanel">
+<div class="guide-panel-header">📖 书页向导</div>
+<div class="guide-panel-body">
+<div class="guide-section"><h4>❓ 常见问题</h4>
+<p><strong>这个网站是谁做的？</strong><br>本站为 daowon 独立搭建的公益书单网站，全部内容、页面设计均为本人原创。</p>
+</div></div></div>
+<button class="guide-toggle" id="guideToggle" aria-label="打开书页向导" onclick="var p=document.getElementById('guidePanel');p.classList.toggle('active');event.stopPropagation()" ontouchstart="var p=document.getElementById('guidePanel');p.classList.toggle('active');event.stopPropagation();event.preventDefault()">📖</button></div>
+</body>
+</html>

@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="light">
+<head><base href="/HerLib/">
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>9月阅读计划 | Her Lib</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<nav class="nav scrolled"><div class="nav-inner">
+<a href="index.html" class="nav-logo"><span style="font-family:Georgia,serif;font-size:1.3rem;font-weight:700;color:var(--color-accent)">📖 Her Lib</span><span style="font-size:0.7rem;color:var(--color-text-muted);margin-left:6px">她的书库</span></a>
+<div class="nav-links"><a href="index.html">首页</a><a href="category.html">分类</a><a href="submit.html">投稿</a><a href="disclaimer.html">关于</a></div></div></nav>
+<main class="page-content"><div class="container container-narrow">
+<div class="breadcrumb"><a href="index.html">首页</a><span class="separator">›</span><a href="category.html">月度阅读计划</a><span class="separator">›</span><span>9月阅读清单</span></div>
+<h1 style="margin-bottom:4px">9月女性成长阅读计划</h1>
+<p style="font-family:Georgia,serif;font-size:0.75rem;color:var(--color-text-muted);letter-spacing:2px;margin-bottom:var(--space-lg)">Her Library, Her Liberation</p>
+<div style="background:var(--color-bg-warm);padding:20px;border-radius:var(--radius-lg);margin-bottom:var(--space-xl);border-left:4px solid var(--color-accent)">
+<div style="display:inline-block;background:var(--color-accent);color:#fff;padding:4px 14px;border-radius:20px;font-size:0.8rem;font-weight:600;margin-bottom:10px">职场平权 · 从向前一步到改变规则</div>
+<p style="margin:0;color:var(--color-text-secondary);line-height:1.8">从个人的"向前一步"到制度的"改变规则"——本月三本书从个体策略到结构改革，帮你成为一名有行动力的女性主义者。</p>
+<p style="margin-top:10px;font-size:0.8rem;color:var(--color-accent);font-weight:600">📊 难度：2本入门 + 1本进阶</p>
+</div>
+<div class="card-grid" id="planBooks"></div>
+</div></main>
+<footer class="footer"><div class="footer-inner">
+<div class="footer-links"><a href="reading-channels.html">📖 阅读渠道说明</a><a href="disclaimer.html">⚖️ 版权免责声明</a><a href="usage-guide.html">📋 网站使用须知</a></div>
+<p style="font-family:Georgia,serif;font-size:0.6rem;color:var(--color-text-muted);letter-spacing:3px;margin-bottom:4px;text-align:center">Her Library, Her Liberation</p>
+<p class="footer-copy">© 2026 Her Lib 她的书库</p><p class="footer-copy" style="font-size:0.65rem;color:var(--color-text-muted);margin-top:4px">daowon独立创作，所有页面设计、书单整理均为个人原创，无团队、无商业运营，纯个人公益分享</p><div style="margin-top:16px;padding-top:12px;border-top:1px solid var(--color-border-light);display:flex;flex-wrap:wrap;justify-content:center;gap:16px;font-size:0.75rem;color:var(--color-text-muted)"><span>📕 小红书 <strong>@她的书库</strong></span><span>💬 公众号 <strong>@她的书库</strong></span></div></div></footer>
+
+<!-- 悬浮书页向导 -->
+<div class="floating-guide" id="floatingGuide">
+<div class="guide-panel" id="guidePanel">
+<div class="guide-panel-header">📖 书页向导</div>
+<div class="guide-panel-body">
+<div class="guide-section"><h4>❓ 常见问题</h4>
+<p><strong>怎么看书？</strong><br>点进任意书籍 → 点击「微信读书」按钮 → 跳转正版平台阅读</p>
+<p><strong>这个网站是谁做的？</strong><br>本站为 daowon 独立搭建的公益书单网站，全部内容、页面设计均为本人原创。</p>
+</div>
+<div class="guide-section"><h4>🌱 阅读路径</h4>
+<p><a href="category.html?level=beginner">→ 入门书单（新手友好）</a></p>
+<p><a href="category.html?level=advanced">→ 进阶书单（理论深入）</a></p>
+</div>
+<div class="guide-section"><h4>📬 反馈</h4>
+<p>邮箱：2935357829@qq.com</p>
+</div></div></div>
+<button class="guide-toggle" id="guideToggle" aria-label="打开书页向导" onclick="var p=document.getElementById('guidePanel');p.classList.toggle('active');event.stopPropagation()" ontouchstart="var p=document.getElementById('guidePanel');p.classList.toggle('active');event.stopPropagation();event.preventDefault()">📖</button></div>
+<script src="js/data.js"></script>
+<script>
+var p=new URLSearchParams(window.location.search);var ids=(p.get("ids")||"").split(",");var grid=document.getElementById("planBooks");
+function wait(cb,r){r=r||50;if(window.books&&window.books.length>0){cb()}else if(r>0){setTimeout(function(){wait(cb,r-1)},100)}}
+wait(function(){
+  ids.forEach(function(id){var b=window.books.find(function(x){return x.id===id});if(!b)return;
+    var card=document.createElement("a");card.href="book.html?id="+b.id;card.className="book-card";
+    card.innerHTML="<div class=book-card-cover style=aspect-ratio:3/4;background:linear-gradient(135deg,#D4A78A,#C67B5C,#E8C8B0);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:16px;text-align:center;color:#fff>"+
+      "<div style=font-size:0.7rem;opacity:0.7;margin-bottom:8px>"+b.categoryLabel+"</div>"+
+      "<div style=font-family:var(--font-heading);font-size:1rem;font-weight:700;text-shadow:0 2px 6px rgba(0,0,0,0.2)>"+b.title+"</div>"+
+      "<div style=font-size:0.7rem;opacity:0.85;margin-top:8px>"+b.author+"</div>"+
+      "<div style=margin-top:10px;font-size:0.65rem;background:rgba(255,255,255,0.2);padding:2px 10px;border-radius:10px>"+b.levelLabel+"</div>"+
+      "</div><div class=book-card-body><div class=book-card-guide>"+(b.guide||"").substring(0,120)+"…</div></div>";
+    grid.appendChild(card);
+  });
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,26 @@
+{
+  "name": "Her Lib 她的书库",
+  "short_name": "Her Lib",
+  "description": "女性主义书籍索引 — 为刚入门的读者打造的系统化阅读地图",
+  "start_url": "/index.html",
+  "display": "standalone",
+  "background_color": "#FAF6F0",
+  "theme_color": "#C67B5C",
+  "orientation": "any",
+  "icons": [
+    {
+      "src": "images/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "images/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["books", "education"],
+  "lang": "zh-CN"
+}

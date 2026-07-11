@@ -1,0 +1,15 @@
+/* TEAM */
+Creator: daowon
+Site: Her Lib 她的书库
+Contact: 2935357829@qq.com
+From: 独立创作，个人公益项目
+Language: Chinese
+
+/* SITE */
+Last update: 2026-07-10
+Standards: HTML5, CSS3, Vanilla JS
+Components: Cloudflare Pages, Cloudflare Workers KV
+
+/* THANKS */
+Name: 所有提供反馈与投稿的读者
+Name: 西蒙娜·德·波伏瓦，上野千鹤子，以及所有为女性主义写作的作者们
